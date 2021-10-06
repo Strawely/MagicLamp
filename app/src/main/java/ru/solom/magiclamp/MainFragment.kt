@@ -7,16 +7,17 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import ru.solom.magiclamp.databinding.FragmentMainBinding
 import kotlin.math.roundToInt
 
-
 @AndroidEntryPoint
 class MainFragment : Fragment() {
     private val viewModel: MainViewModel by viewModels()
     private var binding: FragmentMainBinding? = null
+    private var effectsAdapter: EffectsAdapter? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -29,6 +30,8 @@ class MainFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentMainBinding.bind(view)
+
+        effectsAdapter = EffectsAdapter()
 
         with(binding!!) {
             btnPower.setOnClickListener {
@@ -51,11 +54,16 @@ class MainFragment : Fragment() {
                 binding!!.sliderBrightness.value = state.lampState.brightness.toFloat()
             }
         }
+
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.effects.collect { effects ->
+                effectsAdapter!!.updateEffects(effects)
+            }
+        }
     }
 
     override fun onDestroyView() {
         binding = null
         super.onDestroyView()
     }
-
 }

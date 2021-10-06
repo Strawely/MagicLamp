@@ -1,5 +1,6 @@
 package ru.solom.magiclamp
 
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -7,8 +8,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.net.DatagramSocket
 import javax.inject.Inject
 
 class MainInteractor @Inject constructor(private val repository: MainRepository) {
@@ -25,7 +24,6 @@ class MainInteractor @Inject constructor(private val repository: MainRepository)
             repository.storeAddress(discoveredAddress)
             _addressFlow.value = discoveredAddress
         }
-        getEffects()
     }
 
     suspend fun sendPowerSwitch(isTurnOn: Boolean) {
@@ -45,9 +43,10 @@ class MainInteractor @Inject constructor(private val repository: MainRepository)
         refreshState()
     }
 
-    suspend fun getEffects() {
-        val effects = repository.getEffectsList() ?: return
-        println(effects.drop(1).joinToString("\n"))
+    suspend fun getEffects(): List<EffectDto> {
+        val effects = repository.getEffectsList()
+        val result = effects.map { EffectDto.fromString(it) }.toList()
+        return result
     }
 
     private var refreshJob: Job? = null
@@ -66,16 +65,16 @@ class MainInteractor @Inject constructor(private val repository: MainRepository)
 }
 
 data class LampState(
+    val brightness: Int = 0,
     val isOn: Boolean = false,
-    val brightness: Int = 0
 ) {
     companion object {
         fun fromValues(values: List<String>?) = if (values == null) {
             LampState()
         } else {
             LampState(
+                brightness = values[2].toInt(),
                 isOn = values[5] == "1",
-                brightness = values[2].toInt()
             )
         }
     }

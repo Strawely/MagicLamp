@@ -8,7 +8,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -17,6 +16,9 @@ class MainViewModel @Inject constructor(private val interactor: MainInteractor) 
 
     private val _mainState = MutableStateFlow(MainState())
     val mainState = _mainState.asStateFlow()
+
+    private val _effects = MutableStateFlow(emptyList<EffectDto>())
+    val effects = _effects.asStateFlow()
 
     private var brightnessJob: Job? = null
 
@@ -29,6 +31,9 @@ class MainViewModel @Inject constructor(private val interactor: MainInteractor) 
         viewModelScope.launch {
             interactor.getInitialAddress()
             interactor.getCurrentState()
+            interactor.getEffects().let { newEffects ->
+                _effects.value = newEffects
+            }
         }
         viewModelScope.launch {
             interactor.lampState.collect {

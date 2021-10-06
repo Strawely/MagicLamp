@@ -58,13 +58,14 @@ class MainRepository @Inject constructor(private val activityProvider: ActivityP
         return@withSocket sendWithResult(GET_COMMAND).asString()
     }
 
-    suspend fun getEffectsList(): Sequence<String>? {
-        val result = sequenceOf<String>()
+    suspend fun getEffectsList(): Sequence<String> {
+        var result = sequenceOf<String>()
         for (i in 1..3) {
-            val chunk = withSocket { sendWithResult("LIST $i")?.asString() } ?: return null
-            result + chunk.splitToSequence(';').drop(1).filter { it != "\n" }
+            val chunk = withSocket {
+                sendWithResult("LIST $i")?.asString()?.substringBeforeLast("LIST")
+            } ?: continue
+            result += chunk.splitToSequence(';').drop(1).filter { it != "\n" }
         }
-
         return result
     }
 
