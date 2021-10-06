@@ -4,11 +4,12 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.Inet4Address
+import java.net.InetSocketAddress
+import java.net.SocketTimeoutException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -18,10 +19,12 @@ class MainRepository @Inject constructor(private val activityProvider: ActivityP
         get() = activityProvider.requireActivity()
             .getSharedPreferences(SP_MAIN, Context.MODE_PRIVATE)
 
-    private var prevSocket: DatagramSocket? = null
-    private val socket: DatagramSocket = DatagramSocket(5000)
-    private val responsePacket = DatagramPacket(ByteArray(BUF_SIZE), BUF_SIZE)
-    private var currentAddress: String = ""
+    private val socket: DatagramSocket
+        get() = DatagramSocket(null).apply {
+            reuseAddress = true
+            soTimeout = 10000
+        }
+    private var currentAddress: String? = null
 
     fun storeAddress(addr: String) {
         currentAddress = addr
@@ -29,57 +32,80 @@ class MainRepository @Inject constructor(private val activityProvider: ActivityP
     }
 
     fun getAddress(): String? {
-        return sp.getString(KEY_ADDR, null)
+        currentAddress = sp.getString(KEY_ADDR, null)
+        return currentAddress
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")
     suspend fun discoverLamp() = withSocket {
+        val response = DatagramPacket(ByteArray(BUF_SIZE), BUF_SIZE)
         forAllIpAddresses { i, j -> send(DISCOVER_COMMAND.asPacket("192.168.${i}.${j}")) }
-        receive(responsePacket)
-        return@withSocket responsePacket.data.lampValues
+        receive(response)
+        return@withSocket String(response.data)
     }
 
     suspend fun sendPowerChange(isTurnOn: Boolean) = withSocket {
-        if (isTurnOn) {
-            send("LIST 1")
-            receive(responsePacket)
-            return@withSocket responsePacket.data.lampValues
-        } else {
-            val command = if (isTurnOn) P_ON_COMMAND else P_OFF_COMMAND
-            send("GET")
-            receive(responsePacket)
-            return@withSocket responsePacket.data.lampValues
-        }
+        val command = if (isTurnOn) P_ON_COMMAND else P_OFF_COMMAND
+        val resp = sendWithResult(command)
+        return@withSocket resp?.let { String(it) }
     }
 
-    private inline fun forAllIpAddresses(block: (Int, Int) -> Unit) {
-        for (i in 0..255) {
-            for (j in 0..255) {
-                block(i, j)
-            }
-        }
+    suspend fun sendBrightnessChange(value: Int) = withSocket {
+        sendWithResult(BRIGHTNESS_COMMAND + value.toString())
     }
 
-    private fun DatagramSocket.send(data: String) = send(data.asPacket())
-
-    private suspend inline fun withSocket(
-        crossinline block: DatagramSocket.() -> List<String>
-    ): List<String> {
-        return withContext(Dispatchers.IO) {
-            val tmp = socket.use(block)
-            Log.d("Received!", tmp.joinToString())
-            return@withContext tmp
-        }
+    suspend fun getCurrentState() = withSocket {
+        return@withSocket sendWithResult(GET_COMMAND).asString()
     }
 
-    private fun String.asPacket(addr: String = currentAddress, port: Int = 8888): DatagramPacket {
+    suspend fun getEffectsList(): Sequence<String>? {
+        val result = sequenceOf<String>()
+        for (i in 1..3) {
+            val chunk = withSocket { sendWithResult("LIST $i")?.asString() } ?: return null
+            result + chunk.splitToSequence(';').drop(1).filter { it != "\n" }
+        }
+
+        return result
+    }
+
+    private inline fun forAllIpAddresses(block: (Int, Int) -> Unit) = repeat(255) { i ->
+        repeat(255) { j -> block(i, j) }
+    }
+
+    private fun DatagramSocket.sendWithResult(data: String): ByteArray? {
+        bind(InetSocketAddress(SOCKET_PORT))
+        val response = DatagramPacket(ByteArray(BUF_SIZE), BUF_SIZE)
+        Log.d("Sent!", data)
+        send(data.asPacket())
+        try {
+            receive(response)
+        } catch (e: SocketTimeoutException) {
+            Log.e(this@MainRepository::class.java.canonicalName, e.stackTraceToString())
+        }
+        return response.data
+    }
+
+    private suspend inline fun <T> withSocket(
+        crossinline block: DatagramSocket.() -> T
+    ) = withContext(Dispatchers.IO) {
+        val tmp = socket.use(block)
+        Log.d("Received!", tmp.toString())
+        return@withContext tmp
+    }
+
+    private fun String.asPacket(addr: String? = currentAddress, port: Int = 8888): DatagramPacket {
         val data = toByteArray()
         return DatagramPacket(data, data.size, Inet4Address.getByName(addr), port)
     }
+
+    private fun ByteArray?.asString() = this?.let { String(it) }
 }
 
 private const val KEY_ADDR = "addr"
 private const val DISCOVER_COMMAND = "DISCOVER"
 private const val P_ON_COMMAND = "P_ON"
 private const val P_OFF_COMMAND = "P_OFF"
-private const val BUF_SIZE = 128
+private const val BRIGHTNESS_COMMAND = "BRI"
+private const val GET_COMMAND = "GET"
+private const val BUF_SIZE = 1000
+private const val SOCKET_PORT = 5000

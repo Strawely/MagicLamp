@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
@@ -14,8 +15,10 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(private val interactor: MainInteractor) : ViewModel() {
 
-    private val _mainState = MutableStateFlow(MainState("", progress = false))
+    private val _mainState = MutableStateFlow(MainState())
     val mainState = _mainState.asStateFlow()
+
+    private var brightnessJob: Job? = null
 
     init {
         viewModelScope.launch {
@@ -25,20 +28,32 @@ class MainViewModel @Inject constructor(private val interactor: MainInteractor) 
         }
         viewModelScope.launch {
             interactor.getInitialAddress()
+            interactor.getCurrentState()
         }
         viewModelScope.launch {
             interactor.lampState.collect {
-
+                _mainState.value = _mainState.value.copy(lampState = it)
             }
         }
     }
 
-    fun onPowerSwitchCheck(isChecked: Boolean) = viewModelScope.launch {
-        interactor.sendPowerSwitch(isChecked)
+    fun onPowerBtnClick() = viewModelScope.launch {
+        interactor.sendPowerSwitch(!_mainState.value.lampState.isOn)
+    }
+
+    fun onBrightnessChanged(value: Int) {
+        brightnessJob?.cancel()
+        brightnessJob = viewModelScope.launch {
+            delay(DEBOUNCE_DELAY)
+            interactor.setBrightness(value)
+        }
     }
 }
 
 data class MainState(
-    val address: String?,
-    val progress: Boolean
+    val address: String? = null,
+    val progress: Boolean = false,
+    val lampState: LampState = LampState(),
 )
+
+private const val DEBOUNCE_DELAY = 100L
