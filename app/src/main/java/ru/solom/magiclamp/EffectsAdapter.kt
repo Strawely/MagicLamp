@@ -3,18 +3,20 @@ package ru.solom.magiclamp
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
+import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import ru.solom.magiclamp.databinding.ItemEffectBinding
 
-class EffectsAdapter : RecyclerView.Adapter<EffectsAdapter.EffectViewHolder>() {
+class EffectsAdapter(
+    private val onItemClick: (Int) -> Unit
+) : RecyclerView.Adapter<EffectsAdapter.EffectViewHolder>() {
     private var currentId: Int = 0
     private var data: List<EffectDto> = emptyList()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EffectViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(viewType, parent, false)
-        return EffectViewHolder(view)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_effect, parent, false)
+        return EffectViewHolder(view, onItemClick)
     }
 
     override fun onBindViewHolder(holder: EffectViewHolder, position: Int) {
@@ -26,7 +28,6 @@ class EffectsAdapter : RecyclerView.Adapter<EffectsAdapter.EffectViewHolder>() {
     fun updateEffects(newList: List<EffectDto>) {
         val diff = DiffUtil.calculateDiff(EffectsDiff(data, newList))
         data = newList
-        notifyDataSetChanged()
         diff.dispatchUpdatesTo(this)
     }
 
@@ -38,12 +39,16 @@ class EffectsAdapter : RecyclerView.Adapter<EffectsAdapter.EffectViewHolder>() {
         notifyItemChanged(newIdx)
     }
 
-    inner class EffectViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class EffectViewHolder(itemView: View, private val onItemClick: (Int) -> Unit) :
+        RecyclerView.ViewHolder(itemView) {
         private val binding = ItemEffectBinding.bind(itemView)
 
         fun bind(effect: EffectDto) {
-            binding.imgCurrent.isVisible = effect.id == currentId
+            binding.imgCurrent.isInvisible = effect.id != currentId
             binding.name.text = effect.name
+            binding.root.setOnClickListener {
+                onItemClick(effect.id)
+            }
         }
     }
 }

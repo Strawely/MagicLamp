@@ -20,7 +20,10 @@ class PowerImageButton @JvmOverloads constructor(
         val set = AnimatorSet()
         set.playSequentially(
             ObjectAnimator.ofInt(this, ALPHA_PROP, TARGET_ALPHA).apply {
-                doOnEnd { setImageResource(resId) }
+                doOnEnd {
+                    prevImageResource = resId
+                    setImageResource(resId)
+                }
             },
             ObjectAnimator.ofInt(this, ALPHA_PROP, FULL_ALPHA)
         )

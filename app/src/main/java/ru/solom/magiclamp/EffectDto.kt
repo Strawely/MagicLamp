@@ -1,7 +1,6 @@
 package ru.solom.magiclamp
 
-// Название эффекта,min_скорость,max_скорость,min_масштаб,max_масштаб,
-// выбор_ли_цвета_это(0-нет,1-да 2-совмещённый)
+@Suppress("MagicNumber")
 data class EffectDto(
     val id: Int,
     val name: String,

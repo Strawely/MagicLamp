@@ -3,8 +3,6 @@ package ru.solom.magiclamp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
@@ -19,8 +17,6 @@ class MainViewModel @Inject constructor(private val interactor: MainInteractor) 
 
     private val _effects = MutableStateFlow(emptyList<EffectDto>())
     val effects = _effects.asStateFlow()
-
-    private var brightnessJob: Job? = null
 
     init {
         viewModelScope.launch {
@@ -46,12 +42,12 @@ class MainViewModel @Inject constructor(private val interactor: MainInteractor) 
         interactor.sendPowerSwitch(!_mainState.value.lampState.isOn)
     }
 
-    fun onBrightnessChanged(value: Int) {
-        brightnessJob?.cancel()
-        brightnessJob = viewModelScope.launch {
-            delay(DEBOUNCE_DELAY)
-            interactor.setBrightness(value)
-        }
+    fun onBrightnessChanged(value: Int) = viewModelScope.launch { interactor.setBrightness(value) }
+    fun onSpeedChanged(value: Int) = viewModelScope.launch { interactor.setSpeed(value) }
+    fun onScaleChanged(value: Int) = viewModelScope.launch { interactor.setScale(value) }
+
+    fun onItemClick(id: Int) = viewModelScope.launch {
+        interactor.setEffect(id)
     }
 }
 
@@ -60,5 +56,3 @@ data class MainState(
     val progress: Boolean = false,
     val lampState: LampState = LampState(),
 )
-
-private const val DEBOUNCE_DELAY = 100L

@@ -1,6 +1,5 @@
 package ru.solom.magiclamp
 
-import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -10,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@Suppress("TooManyFunctions")
 class MainInteractor @Inject constructor(private val repository: MainRepository) {
     private val _addressFlow = MutableStateFlow<String?>(null)
     val addressFlow = _addressFlow.asStateFlow()
@@ -20,7 +20,7 @@ class MainInteractor @Inject constructor(private val repository: MainRepository)
     suspend fun getInitialAddress() {
         _addressFlow.value = repository.getAddress()
         if (_addressFlow.value == null) {
-            val discoveredAddress = repository.discoverLamp().lampValues.getAddress()
+            val discoveredAddress = repository.discoverLamp()?.lampValues?.getAddress() ?: return
             repository.storeAddress(discoveredAddress)
             _addressFlow.value = discoveredAddress
         }
@@ -33,13 +33,24 @@ class MainInteractor @Inject constructor(private val repository: MainRepository)
     }
 
     suspend fun getCurrentState() {
-        val result = repository.getCurrentState() ?: return
-        _lampState.value = LampState.fromValues(result.lampValues)
+        _lampState.value = repository.getCurrentState()?.lampValues?.toLampState() ?: LampState()
     }
 
     suspend fun setBrightness(value: Int) {
-        val constrainedValue = value.coerceIn(0, 255)
+        val constrainedValue = value.coerceIn(0, PARAM_MAX_VALUE)
         repository.sendBrightnessChange(constrainedValue)
+        refreshState()
+    }
+
+    suspend fun setSpeed(value: Int) {
+        val constrainedValue = value.coerceIn(0, PARAM_MAX_VALUE)
+        repository.sendSpeedChange(constrainedValue)
+        refreshState()
+    }
+
+    suspend fun setScale(value: Int) {
+        val constrainedValue = value.coerceIn(0, PARAM_MAX_VALUE)
+        repository.sendScaleChange(constrainedValue)
         refreshState()
     }
 
@@ -47,6 +58,10 @@ class MainInteractor @Inject constructor(private val repository: MainRepository)
         val effects = repository.getEffectsList()
         val result = effects.map { EffectDto.fromString(it) }.toList()
         return result
+    }
+
+    suspend fun setEffect(id: Int) {
+        repository.setCurrentEffect(id)?.lampValues?.toLampState()?.let { _lampState.value = it}
     }
 
     private var refreshJob: Job? = null
@@ -64,8 +79,12 @@ class MainInteractor @Inject constructor(private val repository: MainRepository)
     private fun List<String>.toLampState() = LampState.fromValues(this)
 }
 
+@Suppress("MagicNumber")
 data class LampState(
+    val currentId: Int = 0,
     val brightness: Int = 0,
+    val speed: Int = 0,
+    val scale: Int = 0,
     val isOn: Boolean = false,
 ) {
     companion object {
@@ -73,7 +92,10 @@ data class LampState(
             LampState()
         } else {
             LampState(
+                currentId = values[1].toInt(),
                 brightness = values[2].toInt(),
+                speed = values[3].toInt(),
+                scale = values[4].toInt(),
                 isOn = values[5] == "1",
             )
         }
@@ -81,3 +103,4 @@ data class LampState(
 }
 
 private const val STATE_REFRESH_DELAY = 500L
+private const val PARAM_MAX_VALUE = 255
