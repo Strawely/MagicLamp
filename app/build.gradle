@@ -19,12 +19,33 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfig {
+        release {
+            def keystoreProperties = new Properties()
+            def keystorePropsFile = new File("$rootDir/keystore/config")
+
+            keyStoreFile file("$rootDir/keystore/keystore")
+            if (keystorePropsFile.exists()) {
+                keystoreProperties.load(new FileInputStream(keystorePropsFile))
+                keyStorePass "$keystoreProperties.keyStorePass"
+                keyAlias "$keystoreProperties.keyAlias"
+                keyPass "$keystoreProperties.keyPass"
+            } else {
+                keyStorePass System.getenv("SIGN_KEY_STORE_PASS")
+                keyAlias System.getenv("SIGN_KEY_ALIAS")
+                keyPass System.getenv("SIGN_KEY_PASS")
+            }
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
