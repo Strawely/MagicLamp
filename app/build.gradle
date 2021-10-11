@@ -24,7 +24,7 @@ android {
             def keystoreProperties = new Properties()
             def keystorePropsFile = new File("$rootDir/keystore/config")
 
-            storeFile = new File("$rootDir/keystore/keystore")
+            storeFile = new File("$rootDir/keystore/keystore.jks")
             if (keystorePropsFile.exists()) {
                 keystoreProperties.load(new FileInputStream(keystorePropsFile))
                 storePassword "$keystoreProperties.keyStorePass"
