@@ -1,4 +1,4 @@
-package ru.solom.magiclamp
+package ru.solom.magiclamp.main
 
 import android.view.LayoutInflater
 import android.view.View
@@ -6,6 +6,8 @@ import android.view.ViewGroup
 import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import ru.solom.magiclamp.R
+import ru.solom.magiclamp.data.EffectDto
 import ru.solom.magiclamp.databinding.ItemEffectBinding
 
 class EffectsAdapter(

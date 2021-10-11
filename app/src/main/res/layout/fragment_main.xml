@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <ru.solom.magiclamp.PowerImageButton
+    <ru.solom.magiclamp.main.PowerImageButton
         android:id="@+id/btn_power"
         android:layout_width="48dp"
         android:layout_height="48dp"
@@ -74,7 +74,7 @@
         android:text="Scale"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/brightness_slider" />
+        app:layout_constraintTop_toBottomOf="@id/speed_slider" />
 
     <com.google.android.material.slider.Slider
         android:id="@+id/scale_slider"
@@ -100,7 +100,7 @@
         android:text="Speed"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/scale_slider" />
+        app:layout_constraintTop_toBottomOf="@id/brightness_slider" />
 
     <com.google.android.material.slider.Slider
         android:id="@+id/speed_slider"
@@ -125,7 +125,7 @@
         android:background="@color/black"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/speed_slider" />
+        app:layout_constraintTop_toBottomOf="@id/scale_slider" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/effects_list"

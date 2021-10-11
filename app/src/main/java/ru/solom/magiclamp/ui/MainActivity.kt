@@ -1,9 +1,11 @@
-package ru.solom.magiclamp
+package ru.solom.magiclamp.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
 import dagger.hilt.android.AndroidEntryPoint
+import ru.solom.magiclamp.App
+import ru.solom.magiclamp.R
+import ru.solom.magiclamp.main.MainFragment
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
