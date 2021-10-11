@@ -1,4 +1,4 @@
-package ru.solom.magiclamp
+package ru.solom.magiclamp.main
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
+import ru.solom.magiclamp.R
 import ru.solom.magiclamp.databinding.FragmentMainBinding
 import kotlin.math.roundToInt
 
@@ -74,7 +75,6 @@ class MainFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.effects.collect { effects ->
                 effectsAdapter!!.updateEffects(effects)
-                setSlidersConstraints()
             }
         }
     }
@@ -86,17 +86,22 @@ class MainFragment : Fragment() {
     }
 
     private fun setSlidersConstraints() {
-        viewModel.effects.value.firstOrNull {
+        val currentEffect = viewModel.effects.value.firstOrNull {
             it.id == viewModel.mainState.value.lampState.currentId
-        }?.maxSpeed?.toFloat()?.let { binding!!.speedSlider.valueTo = it }
-        viewModel.effects.value.firstOrNull {
-            it.id == viewModel.mainState.value.lampState.currentId
-        }?.minSpeed?.toFloat()?.let { binding!!.speedSlider.valueFrom = it }
-        viewModel.effects.value.firstOrNull {
-            it.id == viewModel.mainState.value.lampState.currentId
-        }?.maxScale?.toFloat()?.let { binding!!.scaleSlider.valueTo = it }
-        viewModel.effects.value.firstOrNull {
-            it.id == viewModel.mainState.value.lampState.currentId
-        }?.minScale?.toFloat()?.let { binding!!.scaleSlider.valueFrom = it }
+        } ?: return
+        if (currentEffect.scaleUnavailable) {
+            binding!!.scaleSlider.isEnabled = false
+        } else {
+            binding!!.scaleSlider.isEnabled = true
+            binding!!.scaleSlider.valueFrom = currentEffect.minScale.toFloat()
+            binding!!.scaleSlider.valueTo = currentEffect.maxScale.toFloat()
+        }
+        if (currentEffect.speedUnavailable) {
+            binding!!.speedSlider.isEnabled = false
+        } else {
+            binding!!.speedSlider.isEnabled = true
+            binding!!.speedSlider.valueFrom = currentEffect.minSpeed.toFloat()
+            binding!!.speedSlider.valueTo = currentEffect.maxSpeed.toFloat()
+        }
     }
 }

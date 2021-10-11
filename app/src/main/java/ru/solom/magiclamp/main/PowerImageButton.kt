@@ -1,4 +1,4 @@
-package ru.solom.magiclamp
+package ru.solom.magiclamp.main
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator

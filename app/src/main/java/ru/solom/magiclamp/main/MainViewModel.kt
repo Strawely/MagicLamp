@@ -1,4 +1,4 @@
-package ru.solom.magiclamp
+package ru.solom.magiclamp.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import ru.solom.magiclamp.data.LampState
 import javax.inject.Inject
 
 @HiltViewModel
@@ -15,8 +16,7 @@ class MainViewModel @Inject constructor(private val interactor: MainInteractor) 
     private val _mainState = MutableStateFlow(MainState())
     val mainState = _mainState.asStateFlow()
 
-    private val _effects = MutableStateFlow(emptyList<EffectDto>())
-    val effects = _effects.asStateFlow()
+    val effects = interactor.effects
 
     init {
         viewModelScope.launch {
@@ -27,9 +27,7 @@ class MainViewModel @Inject constructor(private val interactor: MainInteractor) 
         viewModelScope.launch {
             interactor.getInitialAddress()
             interactor.getCurrentState()
-            interactor.getEffects().let { newEffects ->
-                _effects.value = newEffects
-            }
+            interactor.updateEffects()
         }
         viewModelScope.launch {
             interactor.lampState.collect {

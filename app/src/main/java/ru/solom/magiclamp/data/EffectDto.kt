@@ -1,4 +1,4 @@
-package ru.solom.magiclamp
+package ru.solom.magiclamp.data
 
 @Suppress("MagicNumber")
 data class EffectDto(
@@ -7,7 +7,9 @@ data class EffectDto(
     val minSpeed: Int,
     val maxSpeed: Int,
     val minScale: Int,
-    val maxScale: Int
+    val maxScale: Int,
+    val scaleUnavailable: Boolean,
+    val speedUnavailable: Boolean
 ) {
     companion object {
         fun fromString(string: String): EffectDto {
@@ -18,7 +20,9 @@ data class EffectDto(
                 minSpeed = splitString[1].toInt(),
                 maxSpeed = splitString[2].toInt(),
                 minScale = splitString[3].toInt(),
-                maxScale = splitString[4].toInt()
+                maxScale = splitString[4].toInt(),
+                scaleUnavailable = splitString[3] == splitString[4],
+                speedUnavailable = splitString[1] == splitString[2]
             )
         }
     }
