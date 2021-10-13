@@ -18,6 +18,13 @@ class SpRepository @Inject constructor(private val activityProvider: ActivityPro
     fun getAddress(): String? {
         return sp.getString(KEY_ADDR, null)
     }
+
+    fun storeEffectsSet(effects: List<String>) {
+        sp.edit().putString(KEY_EFFECTS, effects.joinToString(separator = ";")).apply()
+    }
+
+    fun getEffectsSet(): List<String>? = sp.getString(KEY_EFFECTS, null)?.split(";")
 }
 
 private const val KEY_ADDR = "addr"
+private const val KEY_EFFECTS = "effects"

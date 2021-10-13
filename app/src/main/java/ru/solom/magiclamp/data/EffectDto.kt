@@ -11,6 +11,23 @@ data class EffectDto(
     val scaleUnavailable: Boolean,
     val speedUnavailable: Boolean
 ) {
+    override fun toString(): String {
+        fun StringBuilder.appendSeparator() = append(",")
+        return buildString {
+            append("$id. ")
+            append(name)
+            appendSeparator()
+            append(minSpeed)
+            appendSeparator()
+            append(maxSpeed)
+            appendSeparator()
+            append(minScale)
+            appendSeparator()
+            append(maxScale)
+            appendSeparator()
+        }
+    }
+
     companion object {
         fun fromString(string: String): EffectDto {
             val splitString = string.split(',')

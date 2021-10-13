@@ -65,7 +65,18 @@ class MainInteractor @Inject constructor(private val spRepository: SpRepository)
     }
 
     suspend fun updateEffects() {
-        _effects.value = repository.getEffectsList().map { EffectDto.fromString(it) }.toList()
+        val cachedEffects = spRepository.getEffectsSet()?.map { EffectDto.fromString(it) }
+        _effects.value = cachedEffects ?: getEffectsFromLamp()
+    }
+
+    suspend fun invalidateEffects() {
+        _effects.value = getEffectsFromLamp()
+    }
+
+    private suspend fun getEffectsFromLamp(): List<EffectDto> {
+        val effects = repository.getEffectsList().map { EffectDto.fromString(it) }.toList()
+        spRepository.storeEffectsSet(effects.map { it.toString() })
+        return effects
     }
 
     suspend fun setEffect(id: Int) {
