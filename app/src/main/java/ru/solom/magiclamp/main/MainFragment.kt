@@ -50,6 +50,8 @@ class MainFragment : Fragment() {
             }
             effectsList.layoutManager = LinearLayoutManager(requireContext())
             effectsList.adapter = effectsAdapter
+
+            effectsSwipeRefresh.setOnRefreshListener { viewModel.onEffectsRefresh() }
         }
 
         viewLifecycleOwner.lifecycle.coroutineScope.launchWhenStarted {
@@ -68,6 +70,7 @@ class MainFragment : Fragment() {
                     speedSlider.value = state.lampState.speed.toFloat()
                     scaleSlider.value = state.lampState.scale.toFloat()
                     effectsAdapter?.updateCurrent(state.lampState.currentId)
+                    effectsSwipeRefresh.isRefreshing = state.isEffectsRefreshing
                 }
             }
         }

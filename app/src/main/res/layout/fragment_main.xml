@@ -127,16 +127,22 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/scale_slider" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/effects_list"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/effects_swipe_refresh"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintVertical_bias="0"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/sliders_divider"
-        tools:listitem="@layout/item_effect"
-        tools:itemCount="11"/>
+        app:layout_constraintVertical_bias="0">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/effects_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:itemCount="11"
+            tools:listitem="@layout/item_effect" />
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

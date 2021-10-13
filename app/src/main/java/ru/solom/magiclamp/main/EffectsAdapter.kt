@@ -15,6 +15,7 @@ class EffectsAdapter(
 ) : RecyclerView.Adapter<EffectsAdapter.EffectViewHolder>() {
     private var currentId: Int = 0
     private var data: List<EffectDto> = emptyList()
+    private var recycler: RecyclerView? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EffectViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_effect, parent, false)
@@ -27,10 +28,21 @@ class EffectsAdapter(
 
     override fun getItemCount() = data.size
 
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        recycler = recyclerView
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        recycler = null
+    }
+
     fun updateEffects(newList: List<EffectDto>) {
         val diff = DiffUtil.calculateDiff(EffectsDiff(data, newList))
         data = newList
         diff.dispatchUpdatesTo(this)
+        recycler?.scrollToPosition(data.indexOfFirst { it.id == currentId })
     }
 
     fun updateCurrent(id: Int) {
