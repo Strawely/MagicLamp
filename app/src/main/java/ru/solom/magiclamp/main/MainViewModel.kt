@@ -1,5 +1,6 @@
 package ru.solom.magiclamp.main
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -8,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import ru.solom.magiclamp.R
 import ru.solom.magiclamp.data.LampState
 import javax.inject.Inject
 
@@ -20,14 +22,23 @@ class MainViewModel @Inject constructor(private val interactor: MainInteractor) 
     val effects = interactor.effects
 
     init {
-        interactor.addressFlow.onEach {
-            _mainState.value = _mainState.value.copy(address = it)
+        interactor.addressFlow.onEach { addressResult ->
+            addressResult?.fold(
+                onSuccess = {
+                    _mainState.value = _mainState.value.copy(address = AddressState(data = it))
+                },
+                onFailure = {
+                    _mainState.value =
+                        _mainState.value.copy(address = AddressState(error = R.string.addr_error))
+                }
+            )
         }.launchIn(viewModelScope)
 
         viewModelScope.launch {
+            _mainState.value = _mainState.value.copy(address = AddressState(loading = true))
             interactor.getInitialAddress()
             interactor.getCurrentState()
-            interactor.updateEffects()
+            interactor.initEffects()
         }
 
         interactor.lampState.onEach {
@@ -54,8 +65,14 @@ class MainViewModel @Inject constructor(private val interactor: MainInteractor) 
 }
 
 data class MainState(
-    val address: String? = null,
+    val address: AddressState = AddressState(),
     val progress: Boolean = false,
     val lampState: LampState = LampState(),
     val isEffectsRefreshing: Boolean = false
+)
+
+data class AddressState(
+    val loading: Boolean = false,
+    val data: String? = null,
+    @StringRes val error: Int? = null
 )

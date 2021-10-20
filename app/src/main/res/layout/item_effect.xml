@@ -14,7 +14,8 @@
         android:layout_marginStart="8dp"
         android:visibility="invisible"
         android:src="@drawable/ic_done_24"
-        tools:visibility="visible"/>
+        tools:visibility="visible"
+        android:contentDescription="@string/cd_current_effect_mark"/>
 
     <TextView
         android:id="@+id/name"
@@ -22,7 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginVertical="16dp"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
         tools:text="@tools:sample/lorem[2]" />
 
 </androidx.appcompat.widget.LinearLayoutCompat>

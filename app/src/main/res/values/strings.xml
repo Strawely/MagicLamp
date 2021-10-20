@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">MagicLamp</string>
+    <string name="addr_error">Lamp not found</string>
+    <string name="cd_current_effect_mark">Current effect mark</string>
+    <string name="slider_brightness_label">Brightness</string>
+    <string name="slider_scale_label">Scale</string>
+    <string name="slider_speed_label">Speed</string>
 </resources>

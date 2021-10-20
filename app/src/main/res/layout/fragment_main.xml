@@ -29,6 +29,16 @@
         app:layout_constraintTop_toTopOf="@id/btn_power"
         tools:text="Not connected" />
 
+    <ProgressBar
+        android:id="@+id/lamp_addr_progress"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/text_lamp_address"
+        app:layout_constraintEnd_toEndOf="@id/text_lamp_address"
+        app:layout_constraintStart_toStartOf="@id/text_lamp_address"
+        app:layout_constraintTop_toTopOf="@id/text_lamp_address" />
+
     <View
         android:id="@+id/header_divider"
         android:layout_width="0dp"
@@ -45,7 +55,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:text="Brightness"
+        android:text="@string/slider_brightness_label"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/header_divider" />
@@ -71,7 +81,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:text="Scale"
+        android:text="@string/slider_scale_label"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/speed_slider" />
@@ -97,7 +107,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:text="Speed"
+        android:text="@string/slider_speed_label"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/brightness_slider" />
