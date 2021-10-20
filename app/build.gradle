@@ -69,6 +69,9 @@ dependencies {
     implementation deps.androidx.lifecycle_viewmodel
     implementation deps.androidx.fragment_ktx
 
+    implementation deps.androidx.navigation.fragment
+    implementation deps.androidx.navigation.ui
+
     implementation deps.coroutines
     implementation deps.stdlib
 
