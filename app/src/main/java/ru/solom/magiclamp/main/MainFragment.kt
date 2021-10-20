@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.coroutineScope
@@ -25,9 +27,7 @@ class MainFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        return FragmentMainBinding.inflate(inflater, container, false).root
-    }
+    ) = FragmentMainBinding.inflate(inflater, container, false).root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -65,11 +65,11 @@ class MainFragment : Fragment() {
                 with(binding!!) {
                     setSlidersConstraints()
                     btnPower.setImageResourceWithAnim(btnRes)
-                    textLampAddress.text = state.address ?: "Not connected"
                     brightnessSlider.value = state.lampState.brightness.toFloat()
                     speedSlider.value = state.lampState.speed.toFloat()
                     scaleSlider.value = state.lampState.scale.toFloat()
                     effectsAdapter?.updateCurrent(state.lampState.currentId)
+                    textLampAddress.bindAddressState(state.address)
                     effectsSwipeRefresh.isRefreshing = state.isEffectsRefreshing
                 }
             }
@@ -86,6 +86,12 @@ class MainFragment : Fragment() {
         binding = null
         effectsAdapter = null
         super.onDestroyView()
+    }
+
+    private fun TextView.bindAddressState(addressState: AddressState) {
+        addressState.data?.let { text = it }
+        addressState.error?.let { setText(it) }
+        binding!!.lampAddrProgress.isVisible = addressState.loading
     }
 
     private fun setSlidersConstraints() {
