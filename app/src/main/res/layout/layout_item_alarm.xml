@@ -3,15 +3,32 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:paddingVertical="8dp"
+    android:animateLayoutChanges="false">
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/switch_status"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginStart="8dp"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="1"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+        android:maxLines="1"
+        tools:text="@tools:sample/lorem/random[5]" />
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:id="@+id/time"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginHorizontal="8dp"
+        android:paddingHorizontal="4dp"
+        android:layout_weight="4.1"
+        android:gravity="end|center_vertical"
+        android:background="?selectableItemBackground"
+        android:paddingVertical="4dp"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
-        android:textColor="?android:textColorPrimary"
-        tools:text="@tools:sample/lorem[3]"
-        android:layout_marginTop="16dp"
-        android:layout_marginStart="8dp"/>
+        tools:text="@tools:sample/date/hhmm" />
 
 </androidx.appcompat.widget.LinearLayoutCompat>

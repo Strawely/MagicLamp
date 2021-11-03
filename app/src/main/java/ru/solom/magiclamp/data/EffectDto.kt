@@ -8,6 +8,7 @@ data class EffectDto(
     val maxSpeed: Int,
     val minScale: Int,
     val maxScale: Int,
+    val scaleIsColor: Boolean,
     val scaleUnavailable: Boolean,
     val speedUnavailable: Boolean
 ) {
@@ -25,6 +26,7 @@ data class EffectDto(
             appendSeparator()
             append(maxScale)
             appendSeparator()
+            append(scaleIsColor)
         }
     }
 
@@ -38,6 +40,7 @@ data class EffectDto(
                 maxSpeed = splitString[2].toInt(),
                 minScale = splitString[3].toInt(),
                 maxScale = splitString[4].toInt(),
+                scaleIsColor = splitString[5] == "1",
                 scaleUnavailable = splitString[3] == splitString[4],
                 speedUnavailable = splitString[1] == splitString[2]
             )

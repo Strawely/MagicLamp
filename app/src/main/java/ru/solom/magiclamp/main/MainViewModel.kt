@@ -37,8 +37,8 @@ class MainViewModel @Inject constructor(private val interactor: MainInteractor) 
         viewModelScope.launch {
             _mainState.value = _mainState.value.copy(address = AddressState(loading = true))
             interactor.getInitialAddress()
-            interactor.getCurrentState()
             interactor.initEffects()
+            interactor.getCurrentState()
         }
 
         interactor.lampState.onEach {

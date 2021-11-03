@@ -5,4 +5,15 @@
     <string name="slider_brightness_label">Brightness</string>
     <string name="slider_scale_label">Scale</string>
     <string name="slider_speed_label">Speed</string>
+    <string name="menu_home">Home</string>
+    <string name="menu_alarms">Alarms</string>
+    <string-array name="week_days">
+        <item>Monday</item>
+        <item>Tuesday</item>
+        <item>Wednesday</item>
+        <item>Thursday</item>
+        <item>Friday</item>
+        <item>Saturday</item>
+        <item>Sunday</item>
+    </string-array>
 </resources>
