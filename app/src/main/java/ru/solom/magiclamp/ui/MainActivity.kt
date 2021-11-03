@@ -2,17 +2,26 @@ package ru.solom.magiclamp.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import ru.solom.magiclamp.App
 import ru.solom.magiclamp.R
-import ru.solom.magiclamp.main.MainFragment
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        supportFragmentManager.beginTransaction().replace(R.id.container, MainFragment()).commit()
+    }
+
+    override fun onPostResume() {
+        super.onPostResume()
+        val navHost =
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        findViewById<BottomNavigationView>(R.id.bottom_nav_view)
+            .setupWithNavController(navHost.navController)
     }
 
     override fun onStart() {

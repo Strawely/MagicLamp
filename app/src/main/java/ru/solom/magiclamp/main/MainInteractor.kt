@@ -5,22 +5,32 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import ru.solom.magiclamp.data.EffectDto
 import ru.solom.magiclamp.data.LampState
 import ru.solom.magiclamp.data.SpRepository
+import ru.solom.magiclamp.di.MutableAddress
 import ru.solom.magiclamp.lampValues
 import javax.inject.Inject
 
 @Suppress("TooManyFunctions")
-class MainInteractor @Inject constructor(private val spRepository: SpRepository) {
-    private val _addressFlow = MutableStateFlow<Result<String>?>(null)
-    val addressFlow = _addressFlow.asStateFlow()
+class MainInteractor @Inject constructor(
+    private val spRepository: SpRepository,
+    private val repository: MainRepository,
+    @Suppress("ConstructorParameterNaming")
+    @MutableAddress
+    private val _addressFlow: MutableStateFlow<String?>
+) {
+    private val _addressResultFlow = MutableStateFlow<Result<String>?>(null).apply {
+        onEach {
+            _addressFlow.value = it?.getOrNull()
+        }.launchIn(CoroutineScope(Dispatchers.IO))
+    }
+    val addressFlow = _addressResultFlow.asStateFlow()
 
     private val _lampState = MutableStateFlow(LampState())
     val lampState: StateFlow<LampState> = _lampState.asStateFlow()
@@ -28,18 +38,13 @@ class MainInteractor @Inject constructor(private val spRepository: SpRepository)
     private val _effects = MutableStateFlow(emptyList<EffectDto>())
     val effects = _effects.asStateFlow()
 
-    private val repository = MainRepository(
-        addressFlow.map { it?.getOrNull() }.stateIn(
-            CoroutineScope(Dispatchers.IO),
-            started = SharingStarted.Eagerly,
-            initialValue = null
-        )
-    )
-
     suspend fun getInitialAddress() {
-        val addr = spRepository.getAddress() ?: repository.discoverLamp()?.lampValues?.getAddress()
+        val spAddr = spRepository.getAddress()?.takeIf {
+            (repository.tryConnect(it)?.lampValues?.size ?: 0) > 2
+        }
+        val addr = spAddr ?: repository.discoverLamp()?.lampValues?.getAddress()
             ?.also { spRepository.storeAddress(it) }
-        _addressFlow.value = if (addr == null) {
+        _addressResultFlow.value = if (addr == null) {
             Result.failure(IllegalArgumentException("Address not discovered"))
         } else {
             Result.success(addr)
@@ -57,7 +62,8 @@ class MainInteractor @Inject constructor(private val spRepository: SpRepository)
     }
 
     suspend fun getCurrentState() {
-        _lampState.value = repository.getCurrentState()?.lampValues?.toLampState() ?: LampState()
+        val r = repository.getCurrentState()
+        _lampState.value = r?.lampValues?.toLampState() ?: LampState()
     }
 
     suspend fun setBrightness(value: Int) {
@@ -108,7 +114,6 @@ class MainInteractor @Inject constructor(private val spRepository: SpRepository)
     }
 
     private fun List<String>.getAddress() = get(1).substringBefore(':')
-
     private fun List<String>.toLampState() = LampState.fromValues(this)
 }
 

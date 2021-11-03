@@ -3,9 +3,9 @@ package ru.solom.magiclamp.data
 @Suppress("MagicNumber")
 data class LampState(
     val currentId: Int = 0,
-    val brightness: Int = 0,
-    val speed: Int = 0,
-    val scale: Int = 0,
+    val brightness: Int = 1,
+    val speed: Int = 1,
+    val scale: Int = 1,
     val isOn: Boolean = false,
 ) {
     companion object {
