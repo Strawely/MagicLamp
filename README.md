@@ -16,12 +16,16 @@ Now application has two main feature screens
 In the top of the screen there is connection status (if successful - current lamp IP address) and power button.
 Main screen allows setting main effect's parameters - brightness, speed and scale, also it has list of available 
 effects that we can refresh by swipe down.
+<p></p>
+
 ![](images/main_screen.png)
 
 #### Alarms screen
 This feature allows user to set "dawn" alarm when lamp will gradually increase self brightness in particular time.
 API of lamp isn't really handy and we can set only one alarm per day. In feature releases I plan to workaround this
 constraint by client code.
+<p></p>
+
 ![](images/alarms_screen.png)
 
 #### Architecture
